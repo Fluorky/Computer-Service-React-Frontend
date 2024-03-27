@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-
+import getToken from '../GetToken';
+import '../App.css';
 function CustomerList() {
   const [customers, setCustomers] = useState([]);
 
@@ -30,30 +31,6 @@ function CustomerList() {
     }
   };
 
-  const getToken = async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/token/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username: 'MartynaSob@starnet.pl',
-          password: 'Dupcia123.'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch token');
-      }
-
-      const data = await response.json();
-      return data.token;
-    } catch (error) {
-      console.error('Error fetching token:', error);
-      throw error;
-    }
-  };
 
   return (
     <div>

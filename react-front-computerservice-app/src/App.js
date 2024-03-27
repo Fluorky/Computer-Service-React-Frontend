@@ -1,40 +1,21 @@
-import logo from './logo.svg';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import AppToken from './AppToken';
+import Home from './pages/Home'
+import Login from './pages/Login';
+import CustomerList from './pages/CustomerList';
 import './App.css';
-import CustomerList from './CustomerList';
-import { useState, useEffect } from 'react';
-import getToken from './GetToken'; // Import getToken function from GetToken.js
 
 function App() {
-  const [token, setToken] = useState(null);
-
-  useEffect(() => {
-    fetchToken();
-  }, []);
-
-  const fetchToken = async () => {
-    try {
-      const token = await getToken(); // Call the getToken function to fetch the token
-      setToken(token); // Set the token in state
-    } catch (error) {
-      console.error('Error fetching token:', error);
-    }
-  };
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <CustomerList token={token} /> {/* Pass the token to CustomerList component */}
-      </header>
-
-      {token ? (
-        <div>
-          <p>Token: {token}</p>
-          {/* Add any additional components or content here */}
-        </div>
-      ) : (
-        <p>Loading token...</p>
-      )}
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/customerlist" element={<CustomerList />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/apptoken" element={<AppToken />} />
+      </Routes>
+    </Router>
   );
 }
 
