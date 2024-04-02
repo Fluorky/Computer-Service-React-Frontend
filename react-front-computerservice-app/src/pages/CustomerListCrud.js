@@ -11,6 +11,7 @@ function CustomerListCrud() {
     phone_number: '',
     service_requests: 1
   });
+  const [editingCustomerId, setEditingCustomerId] = useState(null); // Track the ID of the customer being edited
 
   useEffect(() => {
     fetchData();
@@ -39,68 +40,151 @@ function CustomerListCrud() {
     }
   };
 
-  const handleInputChange = (e) => {
-    setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, newCustomer) => {
     e.preventDefault();
     try {
       const token = await getToken();
-      const formData = new URLSearchParams(); // Create a new URLSearchParams object
-  
-      // Append each field to the form data
+      const formData = new URLSearchParams();
+
       formData.append('name', newCustomer.name);
       formData.append('surname', newCustomer.surname);
       formData.append('email', newCustomer.email);
       formData.append('phone_number', newCustomer.phone_number);
       formData.append('service_requests', newCustomer.service_requests);
-  
+
       const response = await fetch('http://127.0.0.1:8000/api/customers/', {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
-          'Content-Type': 'application/x-www-form-urlencoded' // Set content type to application/x-www-form-urlencoded
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: formData.toString() // Convert formData to a string
+        body: formData.toString()
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to add new customer');
       }
-  
-      // Refresh customer list after successful creation
+
       fetchData();
     } catch (error) {
       console.error('Error adding new customer:', error);
     }
   };
   
+  const handleEditCustomer = (customerId) => {
+    setEditingCustomerId(customerId);
+    // Find the customer being edited by ID and set their details to the form fields
+    const customerToEdit = customers.find(customer => customer.id === customerId);
+    setNewCustomer(customerToEdit);
+  };
+  
+  const handleUpdateCustomer = async () => {
+    try {
+      const token = await getToken();
+      const formData = new URLSearchParams();
+
+      formData.append('name', newCustomer.name);
+      formData.append('surname', newCustomer.surname);
+      formData.append('email', newCustomer.email);
+      formData.append('phone_number', newCustomer.phone_number);
+      formData.append('service_requests', newCustomer.service_requests);
+
+      const response = await fetch(`http://127.0.0.1:8000/api/customers/${editingCustomerId}/`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData.toString()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update customer');
+      }
+
+      // Clear the editing state and fetch updated customer list
+      setEditingCustomerId(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating customer:', error);
+    }
+  };
+  
+  const handleRemoveCustomer = async (customerId) => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`http://127.0.0.1:8000/api/customers/${customerId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove customer');
+      }
+
+      // Fetch updated customer list after successful deletion
+      fetchData();
+    } catch (error) {
+      console.error('Error removing customer:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value });
+  };
 
   return (
     <div>
       <h1>Customer List</h1>
-      <ul>
-        {customers.map(customer => (
-          <li key={customer.id}>
-            Name: {customer.name} Surname: {customer.surname} Email: {customer.email} <br />
-            Phone number: {customer.phone_number} Address: {customer.address} Service requests: {customer.service_requests}
-          </li>
-        ))}
-      </ul>
-
-      {/* Form to add a new customer */}
-      <form onSubmit={handleSubmit}>
+ 
+    <form onSubmit={(e) => handleSubmit(e, newCustomer)}>
         <input type="text" name="name" placeholder="Name" value={newCustomer.name} onChange={handleInputChange} />
         <input type="text" name="surname" placeholder="Surname" value={newCustomer.surname} onChange={handleInputChange} />
         <input type="email" name="email" placeholder="Email" value={newCustomer.email} onChange={handleInputChange} />
         <input type="text" name="phone_number" placeholder="Phone Number" value={newCustomer.phone_number} onChange={handleInputChange} />
         <input type="text" name="service_requests" placeholder="Service Requests" value={newCustomer.service_requests} onChange={handleInputChange} />
         <button type="submit">Add Customer</button>
-      </form>
+    </form>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Address</th>
+            <th>Service Requests</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {customers.map(customer => (
+            <tr key={customer.id}>
+              <td>{customer.name}</td>
+              <td>{customer.surname}</td>
+              <td>{customer.email}</td>
+              <td>{customer.phone_number}</td>
+              <td>{customer.address}</td>
+              <td>{customer.service_requests}</td>
+              <td>
+                {editingCustomerId === customer.id ? (
+                  <button onClick={handleUpdateCustomer}>Save</button>
+                ) : (
+                  <>
+                    <button onClick={() => handleEditCustomer(customer.id)}>Edit</button>
+                    <button onClick={() => handleRemoveCustomer(customer.id)}>Delete</button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
-/*<input type="text" name="address" placeholder="Address" value={newCustomer.address} onChange={handleInputChange} />*/
 
 export default CustomerListCrud;
