@@ -3,8 +3,8 @@ const qs = require('qs');
 const getToken = async () => {
   try {
     const data = qs.stringify({
-      'username': 'user',
-      'password': 'pass' 
+      'username': 'MartynaSob@starnet.pl',
+      'password': 'Dupcia123.' 
     });
 
     const config = {

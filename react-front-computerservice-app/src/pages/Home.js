@@ -8,7 +8,9 @@ function Home() {
     <div>
       <h2>Home</h2>
       <header className="App-header">
+        <div>
         <Navbar /> 
+        </div>
       </header>
     </div>
   );
