@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import getToken from '../GetToken';
 import '../App.css';
 
-function CustomerListCrud() {
+function CustomerCrud() {
   const [customers, setCustomers] = useState([]);
   const [newCustomer, setNewCustomer] = useState({
     name: '',
@@ -187,4 +187,4 @@ function CustomerListCrud() {
   );
 }
 
-export default CustomerListCrud;
+export default CustomerCrud;

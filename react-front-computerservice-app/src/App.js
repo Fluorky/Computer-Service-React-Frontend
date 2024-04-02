@@ -4,7 +4,7 @@ import AppToken from './AppToken';
 import Home from './pages/Home'
 import Login from './pages/Login';
 import CustomerList from './pages/CustomerList';
-import CustomerListCrud from './pages/CustomerListCrud';
+import CustomerCrud from './pages/CustomerCrud';
 import './App.css';
 
 function App() {
@@ -13,7 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/customerlist" element={<CustomerList />} />
-        <Route path="/customerlistcrud" element={<CustomerListCrud />} />
+        <Route path="/customercrud" element={<CustomerCrud />} />
         <Route path="/login" element={<Login />} />
         <Route path="/apptoken" element={<AppToken />} />
       </Routes>
