@@ -47,26 +47,35 @@ function CustomerListCrud() {
     e.preventDefault();
     try {
       const token = await getToken();
-      console.log(newCustomer)
+      const formData = new URLSearchParams(); // Create a new URLSearchParams object
+  
+      // Append each field to the form data
+      formData.append('name', newCustomer.name);
+      formData.append('surname', newCustomer.surname);
+      formData.append('email', newCustomer.email);
+      formData.append('phone_number', newCustomer.phone_number);
+      formData.append('service_requests', newCustomer.service_requests);
+  
       const response = await fetch('http://127.0.0.1:8000/api/customers/', {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/x-www-form-urlencoded' // Set content type to application/x-www-form-urlencoded
         },
-        body: JSON.stringify(newCustomer)
+        body: formData.toString() // Convert formData to a string
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to add new customer');
       }
-
+  
       // Refresh customer list after successful creation
       fetchData();
     } catch (error) {
       console.error('Error adding new customer:', error);
     }
   };
+  
 
   return (
     <div>
