@@ -3,7 +3,7 @@ import Navbar from './Navbar';
 
 function Home() {
 
-
+  console.log(localStorage.getItem('token'));
   return (
     <div>
       <h2>Home</h2>

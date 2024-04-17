@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login';
 import CustomerList from './pages/CustomerList';
 import CustomerCrud from './pages/CustomerCrud';
+import Logoff from './pages/Logoff';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/customercrud" element={<CustomerCrud />} />
         <Route path="/login" element={<Login />} />
         <Route path="/apptoken" element={<AppToken />} />
+        <Route path="/logoff" element={<Logoff />} />
       </Routes>
     </Router>
   );

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // Get the navigate function from React Router
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,9 +26,9 @@ function Login() {
       }
 
       const data = await response.json();
-      localStorage.setItem('token', data.token); // Store token in local storage
-      console.log(data);
-      // Redirect or update UI
+      localStorage.setItem('token', data.token);
+      // Redirect to the home page after successful login
+      navigate('/'); // Assuming your home page route is '/'
     } catch (error) {
       console.error('Error logging in:', error);
       setError('Login failed. Please check your username and password.');
