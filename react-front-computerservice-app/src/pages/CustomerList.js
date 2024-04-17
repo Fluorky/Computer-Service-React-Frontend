@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import getToken from '../GetToken';
 import '../App.css';
 function CustomerList() {
   const [customers, setCustomers] = useState([]);
@@ -10,8 +9,7 @@ function CustomerList() {
 
   const fetchData = async () => {
     try {
-      const token = await getToken(); // Retrieve the token
-
+      const token = localStorage.getItem('token');
       const response = await fetch('http://127.0.0.1:8000/api/customers/', {
         method: 'GET',
         headers: {

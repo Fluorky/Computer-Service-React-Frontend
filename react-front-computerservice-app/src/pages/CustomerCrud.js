@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import getToken from '../GetToken';
 import '../App.css';
 
 function CustomerCrud() {
@@ -19,8 +18,7 @@ function CustomerCrud() {
 
   const fetchData = async () => {
     try {
-      const token = await getToken();
-
+      const token = localStorage.getItem('token');
       const response = await fetch('http://127.0.0.1:8000/api/customers/', {
         method: 'GET',
         headers: {
@@ -43,7 +41,7 @@ function CustomerCrud() {
   const handleSubmit = async (e, newCustomer) => {
     e.preventDefault();
     try {
-      const token = await getToken();
+      const token = localStorage.getItem('token');
       const formData = new URLSearchParams();
 
       formData.append('name', newCustomer.name);
@@ -80,7 +78,7 @@ function CustomerCrud() {
   
   const handleUpdateCustomer = async () => {
     try {
-      const token = await getToken();
+      const token = localStorage.getItem('token');
       const formData = new URLSearchParams();
 
       formData.append('name', newCustomer.name);
@@ -112,7 +110,7 @@ function CustomerCrud() {
   
   const handleRemoveCustomer = async (customerId) => {
     try {
-      const token = await getToken();
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://127.0.0.1:8000/api/customers/${customerId}/`, {
         method: 'DELETE',
         headers: {
