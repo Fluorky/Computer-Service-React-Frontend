@@ -6,6 +6,7 @@ import CustomerList from './pages/CustomerList';
 import CustomerCrud from './pages/CustomerCrud';
 import Logoff from './pages/Logoff';
 import './App.css';
+import ServiceRequestCrud from './pages/ServiceRequestCrud';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/customerlist" element={<CustomerList />} />
         <Route path="/customercrud" element={<CustomerCrud />} />
+        <Route path="/servicerequestcrud" element={<ServiceRequestCrud />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logoff" element={<Logoff />} />
       </Routes>
