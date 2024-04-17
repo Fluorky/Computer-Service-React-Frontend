@@ -1,8 +1,8 @@
 import React from 'react';
 
-function Logoff() {
+function Logout() {
   // Function to handle logoff
-  const handleLogoff = () => {
+  const handleLogout = () => {
     // Remove token from local storage
     localStorage.removeItem('token');
     // Redirect to the login page or any other page as needed
@@ -12,11 +12,11 @@ function Logoff() {
 
   return (
     <div>
-      <h2>Logoff</h2>
-      <p>Are you sure you want to log off?</p>
-      <button onClick={handleLogoff}>Log Off</button>
+      <h2> Logout</h2>
+      <p>Are you sure you want to logout?</p>
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 }
 
-export default Logoff;
+export default Logout;
