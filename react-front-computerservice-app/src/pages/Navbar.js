@@ -11,6 +11,7 @@ function Navbar() {
         <li><Link to="/customercrud">CustomerListCrud</Link></li>
         <li><Link to="/servicerequestcrud">ServiceRequestCrud</Link></li>
         <li><Link to="/servicetechniciancrud">ServiceTechnicianCrud</Link></li>
+        <li><Link to="/partcrud">PartCrud</Link></li>
         <li><Link to="/login">Login</Link></li>
         <li><Link to="/logout">Logout</Link></li>
       </ul>

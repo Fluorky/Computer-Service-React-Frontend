@@ -8,6 +8,7 @@ import Logout from './pages/Logout';
 import './App.css';
 import ServiceRequestCrud from './pages/ServiceRequestCrud';
 import ServiceTechnicianCrud from './pages/ServiceTechnicianCrud';
+import PartCrud from './pages/PartCrud';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/customercrud" element={<CustomerCrud />} />
         <Route path="/servicerequestcrud" element={<ServiceRequestCrud />} />
         <Route path="/servicetechniciancrud" element={<ServiceTechnicianCrud />} />
+        <Route path="/partcrud" element={<PartCrud />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
       </Routes>
