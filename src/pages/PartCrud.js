@@ -12,6 +12,7 @@ function PartCrud() {
     supplier: ''
   });
   const [editingPartId, setEditingPartId] = useState(null);
+  const [suppliers, setSuppliers] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -20,7 +21,7 @@ function PartCrud() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://127.0.0.1:8000/api/parts/', {
+      const partsResponse = await fetch('http://127.0.0.1:8000/api/parts/', {
         method: 'GET',
         headers: {
           'Authorization': `Token ${token}`,
@@ -28,25 +29,50 @@ function PartCrud() {
         }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
+      if (!partsResponse.ok) {
+        throw new Error('Failed to fetch parts data');
       }
 
-      const data = await response.json();
-      setParts(data);
+      const partsData = await partsResponse.json();
+      setParts(partsData);
+
+      const suppliersResponse = await fetch('http://127.0.0.1:8000/api/supplier/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!suppliersResponse.ok) {
+        throw new Error('Failed to fetch suppliers data');
+      }
+
+      const suppliersData = await suppliersResponse.json();
+      setSuppliers(suppliersData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
+  };
+
+  const getSupplierNameById = (supplierId) => {
+    const supplier = suppliers.find(supplier => supplier.id === supplierId);
+    return supplier ? supplier.name : '';
   };
 
   const handleSubmit = async (e, newPart) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
+      const supplierId = suppliers.find(supplier => supplier.name === newPart.supplier)?.id;
       const formData = new URLSearchParams();
 
       Object.entries(newPart).forEach(([key, value]) => {
-        formData.append(key, value);
+        if (key === 'supplier') {
+          formData.append(key, supplierId);
+        } else {
+          formData.append(key, value);
+        }
       });
 
       const response = await fetch('http://127.0.0.1:8000/api/parts/', {
@@ -71,16 +97,24 @@ function PartCrud() {
   const handleEditPart = (partId) => {
     setEditingPartId(partId);
     const partToEdit = parts.find(part => part.id === partId);
-    setNewPart(partToEdit);
+    // Find the name of the supplier based on its ID
+    const supplierName = getSupplierNameById(partToEdit.supplier);
+    // Update the newPart state to include the supplier name
+    setNewPart({ ...partToEdit, supplier: supplierName });
   };
 
   const handleUpdatePart = async () => {
     try {
       const token = localStorage.getItem('token');
+      const supplierId = suppliers.find(supplier => supplier.name === newPart.supplier)?.id;
       const formData = new URLSearchParams();
 
       Object.entries(newPart).forEach(([key, value]) => {
-        formData.append(key, value);
+        if (key === 'supplier') {
+          formData.append(key, supplierId);
+        } else {
+          formData.append(key, value);
+        }
       });
 
       const response = await fetch(`http://127.0.0.1:8000/api/parts/${editingPartId}/`, {
@@ -160,7 +194,7 @@ function PartCrud() {
               <td>{part.tax}</td>
               <td>{part.description}</td>
               <td>{part.quantity_in_stock}</td>
-              <td>{part.supplier}</td>
+              <td>{getSupplierNameById(part.supplier)}</td>
               <td>
                 {editingPartId === part.id ? (
                   <button onClick={handleUpdatePart}>Save</button>
