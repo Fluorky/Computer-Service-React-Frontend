@@ -8,6 +8,7 @@ function CustomerCrud() {
     surname: '',
     email: '',
     phone_number: '',
+    address: '',
     service_requests: 1
   });
   const [editingCustomerId, setEditingCustomerId] = useState(null); // Track the ID of the customer being edited
@@ -48,6 +49,7 @@ function CustomerCrud() {
       formData.append('surname', newCustomer.surname);
       formData.append('email', newCustomer.email);
       formData.append('phone_number', newCustomer.phone_number);
+      formData.append('address', newCustomer.address);
       formData.append('service_requests', newCustomer.service_requests);
 
       const response = await fetch('http://127.0.0.1:8000/api/customers/', {
@@ -85,6 +87,7 @@ function CustomerCrud() {
       formData.append('surname', newCustomer.surname);
       formData.append('email', newCustomer.email);
       formData.append('phone_number', newCustomer.phone_number);
+      formData.append('address', newCustomer.address);
       formData.append('service_requests', newCustomer.service_requests);
 
       const response = await fetch(`http://127.0.0.1:8000/api/customers/${editingCustomerId}/`, {
@@ -143,6 +146,7 @@ function CustomerCrud() {
         <input type="text" name="surname" placeholder="Surname" value={newCustomer.surname} onChange={handleInputChange} />
         <input type="email" name="email" placeholder="Email" value={newCustomer.email} onChange={handleInputChange} />
         <input type="text" name="phone_number" placeholder="Phone Number" value={newCustomer.phone_number} onChange={handleInputChange} />
+        <input type="text" name="address" placeholder="Address" value={newCustomer.address} onChange={handleInputChange} />
         <input type="text" name="service_requests" placeholder="Service Requests" value={newCustomer.service_requests} onChange={handleInputChange} />
         <button type="submit">Add Customer</button>
     </form>
