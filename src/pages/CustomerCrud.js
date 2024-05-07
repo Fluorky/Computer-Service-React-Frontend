@@ -11,10 +11,12 @@ function CustomerCrud() {
     address: '',
     service_requests: 1
   });
+  const [addressData, setAddressData] = useState([]);
   const [editingCustomerId, setEditingCustomerId] = useState(null); // Track the ID of the customer being edited
 
   useEffect(() => {
     fetchData();
+    fetchAddress();
   }, []);
 
   const fetchData = async () => {
@@ -39,11 +41,35 @@ function CustomerCrud() {
     }
   };
 
+  const fetchAddress = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://127.0.0.1:8000/api/address/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch address data');
+      }
+  
+      const addressData = await response.json();
+      setAddressData(addressData);
+    } catch (error) {
+      console.error('Error fetching address data:', error);
+    }
+  };
+  
+
+
   const handleSubmit = async (e, newCustomer) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const formData = new URLSearchParams();
+      const formData = new FormData();
 
       formData.append('name', newCustomer.name);
       formData.append('surname', newCustomer.surname);
@@ -56,9 +82,8 @@ function CustomerCrud() {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: formData.toString()
+        body: formData
       });
 
       if (!response.ok) {
@@ -70,18 +95,27 @@ function CustomerCrud() {
       console.error('Error adding new customer:', error);
     }
   };
-  
+
   const handleEditCustomer = (customerId) => {
     setEditingCustomerId(customerId);
-    // Find the customer being edited by ID and set their details to the form fields
     const customerToEdit = customers.find(customer => customer.id === customerId);
-    setNewCustomer(customerToEdit);
+    setNewCustomer(prevCustomer => ({
+      ...prevCustomer,
+      name: customerToEdit.name,
+      surname: customerToEdit.surname,
+      email: customerToEdit.email,
+      phone_number: customerToEdit.phone_number,
+      address: customerToEdit.address,
+      service_requests: customerToEdit.service_requests
+    }));
   };
   
+  
+    
   const handleUpdateCustomer = async () => {
     try {
       const token = localStorage.getItem('token');
-      const formData = new URLSearchParams();
+      const formData = new FormData();
 
       formData.append('name', newCustomer.name);
       formData.append('surname', newCustomer.surname);
@@ -94,23 +128,21 @@ function CustomerCrud() {
         method: 'PUT',
         headers: {
           'Authorization': `Token ${token}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: formData.toString()
+        body: formData
       });
 
       if (!response.ok) {
         throw new Error('Failed to update customer');
       }
 
-      // Clear the editing state and fetch updated customer list
       setEditingCustomerId(null);
       fetchData();
     } catch (error) {
       console.error('Error updating customer:', error);
     }
   };
-  
+
   const handleRemoveCustomer = async (customerId) => {
     try {
       const token = localStorage.getItem('token');
@@ -118,7 +150,6 @@ function CustomerCrud() {
         method: 'DELETE',
         headers: {
           'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
         }
       });
 
@@ -126,7 +157,6 @@ function CustomerCrud() {
         throw new Error('Failed to remove customer');
       }
 
-      // Fetch updated customer list after successful deletion
       fetchData();
     } catch (error) {
       console.error('Error removing customer:', error);
@@ -134,22 +164,40 @@ function CustomerCrud() {
   };
 
   const handleInputChange = (e) => {
-    setNewCustomer({ ...newCustomer, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setNewCustomer(prevCustomer => ({
+      ...prevCustomer,
+      [name]: value
+    }));
+  };
+
+  const handleAddressChange = (e) => {
+    const selectedAddressId = e.target.value;
+    setNewCustomer(prevCustomer => ({
+      ...prevCustomer,
+      address: selectedAddressId
+    }));
   };
 
   return (
     <div>
       <h1>Customer List</h1>
  
-    <form onSubmit={(e) => handleSubmit(e, newCustomer)}>
+      <form onSubmit={(e) => handleSubmit(e, newCustomer)}>
         <input type="text" name="name" placeholder="Name" value={newCustomer.name} onChange={handleInputChange} />
         <input type="text" name="surname" placeholder="Surname" value={newCustomer.surname} onChange={handleInputChange} />
         <input type="email" name="email" placeholder="Email" value={newCustomer.email} onChange={handleInputChange} />
         <input type="text" name="phone_number" placeholder="Phone Number" value={newCustomer.phone_number} onChange={handleInputChange} />
-        <input type="text" name="address" placeholder="Address" value={newCustomer.address} onChange={handleInputChange} />
+        <select name="address" value={newCustomer.address} onChange={handleAddressChange}>
+          <option value="">Select Address</option>
+          {addressData.map(address => (
+            <option key={address.id} value={address.id}>{`${address.address_line1}, ${address.city}, ${address.country}`}</option>
+          ))}
+        </select>
         <input type="text" name="service_requests" placeholder="Service Requests" value={newCustomer.service_requests} onChange={handleInputChange} />
         <button type="submit">Add Customer</button>
-    </form>
+      </form>
+      
       <table>
         <thead>
           <tr>
@@ -163,26 +211,37 @@ function CustomerCrud() {
           </tr>
         </thead>
         <tbody>
-          {customers.map(customer => (
-            <tr key={customer.id}>
-              <td>{customer.name}</td>
-              <td>{customer.surname}</td>
-              <td>{customer.email}</td>
-              <td>{customer.phone_number}</td>
-              <td>{customer.address}</td>
-              <td>{customer.service_requests}</td>
-              <td>
-                {editingCustomerId === customer.id ? (
-                  <button onClick={handleUpdateCustomer}>Save</button>
-                ) : (
-                  <>
-                    <button onClick={() => handleEditCustomer(customer.id)}>Edit</button>
-                    <button onClick={() => handleRemoveCustomer(customer.id)}>Delete</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
+        {customers.map(customer => (
+          <tr key={customer.id}>
+            <td>{customer.name}</td>
+            <td>{customer.surname}</td>
+            <td>{customer.email}</td>
+            <td>{customer.phone_number}</td>
+            <td>
+              {customer.address && (
+                <>
+                  <p>{addressData.find(address => address.id === customer.address)?.address_line1}</p>
+                  <p>{addressData.find(address => address.id === customer.address)?.address_line2}</p>
+                  <p>{addressData.find(address => address.id === customer.address)?.city}</p>
+                  <p>{addressData.find(address => address.id === customer.address)?.country}</p>
+                  <p>{addressData.find(address => address.id === customer.address)?.postal_code}</p>
+                </>
+              )}
+            </td>
+            <td>{customer.service_requests}</td>
+            <td>
+              {editingCustomerId === customer.id ? (
+                <button onClick={handleUpdateCustomer}>Save</button>
+              ) : (
+                <>
+                  <button onClick={() => handleEditCustomer(customer.id)}>Edit</button>
+                  <button onClick={() => handleRemoveCustomer(customer.id)}>Delete</button>
+                </>
+              )}
+            </td>
+          </tr>
+        ))}
+
         </tbody>
       </table>
     </div>
