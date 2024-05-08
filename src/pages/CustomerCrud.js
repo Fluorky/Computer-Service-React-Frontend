@@ -9,14 +9,16 @@ function CustomerCrud() {
     email: '',
     phone_number: '',
     address: '',
-    service_requests: 1
+    service_requests: '' // Updated to be a string instead of a number
   });
   const [addressData, setAddressData] = useState([]);
+  const [serviceRequestsData, setServiceRequestsData] = useState([]); // New state for service requests data
   const [editingCustomerId, setEditingCustomerId] = useState(null); // Track the ID of the customer being edited
 
   useEffect(() => {
     fetchData();
     fetchAddress();
+    fetchServiceRequests(); // Fetch service requests data when component mounts
   }, []);
 
   const fetchData = async () => {
@@ -62,8 +64,28 @@ function CustomerCrud() {
       console.error('Error fetching address data:', error);
     }
   };
-  
 
+  const fetchServiceRequests = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://127.0.0.1:8000/api/service-requests/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch service requests data');
+      }
+
+      const serviceRequestsData = await response.json();
+      setServiceRequestsData(serviceRequestsData);
+    } catch (error) {
+      console.error('Error fetching service requests data:', error);
+    }
+  };
 
   const handleSubmit = async (e, newCustomer) => {
     e.preventDefault();
@@ -110,8 +132,6 @@ function CustomerCrud() {
     }));
   };
   
-  
-    
   const handleUpdateCustomer = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -179,6 +199,14 @@ function CustomerCrud() {
     }));
   };
 
+  const handleServiceRequestChange = (e) => {
+    const selectedServiceRequestId = e.target.value;
+    setNewCustomer(prevCustomer => ({
+      ...prevCustomer,
+      service_requests: selectedServiceRequestId
+    }));
+  };
+
   return (
     <div>
       <h1>Customer List</h1>
@@ -191,10 +219,15 @@ function CustomerCrud() {
         <select name="address" value={newCustomer.address} onChange={handleAddressChange}>
           <option value="">Select Address</option>
           {addressData.map(address => (
-            <option key={address.id} value={address.id}>{`${address.address_line1}, ${address.city}, ${address.country}`}</option>
+            <option key={address.id} value={address.id}>{`${address.address_line1}, ${address.address_line2}, ${address.city}, ${address.country}`}</option>
           ))}
         </select>
-        <input type="text" name="service_requests" placeholder="Service Requests" value={newCustomer.service_requests} onChange={handleInputChange} />
+        <select name="service_requests" value={newCustomer.service_requests} onChange={handleServiceRequestChange}>
+          <option value="">Select Service Request</option>
+          {serviceRequestsData.map(serviceRequest => (
+            <option key={serviceRequest.id} value={serviceRequest.id}>{`${serviceRequest.name}`}</option>
+          ))}
+        </select>
         <button type="submit">Add Customer</button>
       </form>
       
@@ -228,7 +261,17 @@ function CustomerCrud() {
                 </>
               )}
             </td>
-            <td>{customer.service_requests}</td>
+            <td>
+            {customer.service_requests && (
+              <>
+                {customer.service_requests.map(requestId => (
+                  <p key={requestId}>
+                    {serviceRequestsData.find(serviceRequest => serviceRequest.id === requestId)?.name}
+                  </p>
+                ))}
+              </>
+            )}
+            </td>
             <td>
               {editingCustomerId === customer.id ? (
                 <button onClick={handleUpdateCustomer}>Save</button>
@@ -241,6 +284,7 @@ function CustomerCrud() {
             </td>
           </tr>
         ))}
+
 
         </tbody>
       </table>
