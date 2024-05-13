@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 function ServiceRequestCrud() {
   const [serviceRequests, setServiceRequests] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+  const [serviceTechnicians, setServiceTechnicians] = useState([]);
   const [newServiceRequest, setNewServiceRequest] = useState({
     name: '',
     price: '',
@@ -20,6 +23,9 @@ function ServiceRequestCrud() {
 
   useEffect(() => {
     fetchData();
+    fetchCustomers();
+    fetchAddresses();
+    fetchServiceTechnicians();
   }, []);
 
   const fetchData = async () => {
@@ -41,6 +47,72 @@ function ServiceRequestCrud() {
       setServiceRequests(data);
     } catch (error) {
       console.error('Error fetching data:', error);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://127.0.0.1:8000/api/customers/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch customers data');
+      }
+
+      const data = await response.json();
+      setCustomers(data);
+    } catch (error) {
+      console.error('Error fetching customers data:', error);
+    }
+  };
+
+  const fetchAddresses = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://127.0.0.1:8000/api/address/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch addresses data');
+      }
+
+      const data = await response.json();
+      setAddresses(data);
+    } catch (error) {
+      console.error('Error fetching addresses data:', error);
+    }
+  };
+
+  const fetchServiceTechnicians = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://127.0.0.1:8000/api/service-technicians/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch service technicians data');
+      }
+
+      const data = await response.json();
+      setServiceTechnicians(data);
+    } catch (error) {
+      console.error('Error fetching service technicians data:', error);
     }
   };
 
@@ -130,6 +202,21 @@ function ServiceRequestCrud() {
   const handleInputChange = (e) => {
     setNewServiceRequest({ ...newServiceRequest, [e.target.name]: e.target.value });
   };
+  const formatDateTime = (dateTime) => {
+    if (!dateTime) return ''; // Obsługa przypadku, gdy data jest pusta
+  
+    const formattedDate = new Date(dateTime);
+  
+    const year = formattedDate.getFullYear();
+    const month = (formattedDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = formattedDate.getDate().toString().padStart(2, '0');
+    const hours = formattedDate.getHours().toString().padStart(2, '0');
+    const minutes = formattedDate.getMinutes().toString().padStart(2, '0');
+  
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+  
+  
 
   return (
     <div>
@@ -139,14 +226,35 @@ function ServiceRequestCrud() {
         <input type="text" name="price" placeholder="Price" value={newServiceRequest.price} onChange={handleInputChange} />
         <input type="text" name="tax" placeholder="Tax" value={newServiceRequest.tax} onChange={handleInputChange} />
         <input type="text" name="description" placeholder="Description" value={newServiceRequest.description} onChange={handleInputChange} />
-        <input type="datetime-local" name="requested_at" placeholder="Requested At" value={newServiceRequest.requested_at} onChange={handleInputChange} />
-        <input type="datetime-local" name="completion_deadline" placeholder="Completion Deadline" value={newServiceRequest.completion_deadline} onChange={handleInputChange} />
+        <input type="datetime-local" name="requested_at" placeholder="Requested At" value={formatDateTime(newServiceRequest.requested_at)} onChange={handleInputChange} />
+        <input type="datetime-local" name="completion_deadline" placeholder="Completion Deadline" value={formatDateTime(newServiceRequest.completion_deadline)} onChange={handleInputChange} />
         <input type="text" name="priority" placeholder="Priority" value={newServiceRequest.priority} onChange={handleInputChange} />
         <input type="text" name="state" placeholder="State" value={newServiceRequest.state} onChange={handleInputChange} />
-        <input type="text" name="requested_by" placeholder="Requested By" value={newServiceRequest.requested_by} onChange={handleInputChange} />
-        <input type="text" name="owned_by" placeholder="Owned By" value={newServiceRequest.owned_by} onChange={handleInputChange} />
-        <input type="text" name="billing_address" placeholder="Billing Address" value={newServiceRequest.billing_address} onChange={handleInputChange} />
-        <input type="text" name="shipping_address" placeholder="Shipping Address" value={newServiceRequest.shipping_address} onChange={handleInputChange} />
+        <select name="requested_by" value={newServiceRequest.requested_by} onChange={handleInputChange}>
+          <option value="">Select Requested By</option>
+          {customers.map(customer => (
+            <option key={customer.id} value={customer.id}>{`${customer.name} ${customer.surname}`}</option>
+          ))}
+        </select>
+        <select name="owned_by" value={newServiceRequest.owned_by} onChange={handleInputChange}>
+          <option value="">Select Service Technician</option>
+          {serviceTechnicians.map(technician => (
+            <option key={technician.id} value={technician.id}>{`${technician.first_name} ${technician.last_name} ${technician.email}`}</option>
+          ))}
+        </select>
+
+        <select name="billing_address" value={newServiceRequest.billing_address} onChange={handleInputChange}>
+          <option value="">Select Billing Address</option>
+          {addresses.map(address => (
+            <option key={address.id} value={address.id}>{`${address.address_line1}, ${address.address_line2}, ${address.city}, ${address.country}`}</option>
+          ))}
+        </select>
+        <select name="shipping_address" value={newServiceRequest.shipping_address} onChange={handleInputChange}>
+          <option value="">Select Shipping Address</option>
+          {addresses.map(address => (
+            <option key={address.id} value={address.id}>{`${address.address_line1}, ${address.address_line2}, ${address.city}, ${address.country}`}</option>
+          ))}
+        </select>
         <button type="submit">Add Service Request</button>
       </form>
       <table>
@@ -174,14 +282,14 @@ function ServiceRequestCrud() {
               <td>{serviceRequest.price}</td>
               <td>{serviceRequest.tax}</td>
               <td>{serviceRequest.description}</td>
-              <td>{serviceRequest.requested_at}</td>
-              <td>{serviceRequest.completion_deadline}</td>
+              <td>{serviceRequest.requested_at ? new Date(serviceRequest.requested_at).toLocaleString() : ''}</td>
+              <td>{serviceRequest.completion_deadline ? new Date(serviceRequest.completion_deadline).toLocaleString() : ''}</td>
               <td>{serviceRequest.priority}</td>
               <td>{serviceRequest.state}</td>
-              <td>{serviceRequest.requested_by}</td>
-              <td>{serviceRequest.owned_by}</td>
-              <td>{serviceRequest.billing_address}</td>
-              <td>{serviceRequest.shipping_address}</td>
+              <td>{customers.find(customer => customer.id === serviceRequest.requested_by)?.name} {customers.find(customer => customer.id === serviceRequest.requested_by)?.surname}</td>
+              <td>{serviceTechnicians.find(technician => technician.id === parseInt(serviceRequest.owned_by))?.first_name} {serviceTechnicians.find(technician => technician.id === parseInt(serviceRequest.owned_by))?.last_name} {serviceTechnicians.find(technician => technician.id === parseInt(serviceRequest.owned_by))?.email}</td>
+              <td>{addresses.find(address => address.id === serviceRequest.billing_address)?.address_line1}, {addresses.find(address => address.id === serviceRequest.billing_address)?.address_line2}, {addresses.find(address => address.id === serviceRequest.billing_address)?.city}, {addresses.find(address => address.id === serviceRequest.billing_address)?.country}</td>
+              <td>{addresses.find(address => address.id === serviceRequest.shipping_address)?.address_line1}, {addresses.find(address => address.id === serviceRequest.shipping_address)?.address_line2}, {addresses.find(address => address.id === serviceRequest.shipping_address)?.city}, {addresses.find(address => address.id === serviceRequest.shipping_address)?.country}</td>
               <td>
                 {editingServiceRequestId === serviceRequest.id ? (
                   <button onClick={handleUpdateServiceRequest}>Save</button>
