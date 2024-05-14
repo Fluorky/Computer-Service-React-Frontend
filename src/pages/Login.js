@@ -22,16 +22,21 @@ function Login() {
       });
 
       if (!response.ok) {
-        throw new Error('Login failed');
+        if(response.status === 400 || response.status === 401) {
+          setError('Invalid username or password.');
+        } else {
+          throw new Error('Login failed');
+        }
+      } else {
+        setError(''); // Reset error state on successful login
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        // Redirect to the home page after successful login
+        navigate('/');
       }
-
-      const data = await response.json();
-      localStorage.setItem('token', data.token);
-      // Redirect to the home page after successful login
-      navigate('/'); // Assuming your home page route is '/'
     } catch (error) {
       console.error('Error logging in:', error);
-      setError('Login failed. Please check your username and password.');
+      setError('Login failed. Please try again later.');
     }
   };
 
